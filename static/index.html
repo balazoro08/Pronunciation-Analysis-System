@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinguaPitch - AI Pronunciation Analysis System</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-waveform"></i>
+        </div>
+        <div class="brand-text">
+          <h1>LinguaPitch</h1>
+          <span>Pronunciation Analysis System</span>
+        </div>
+      </div>
+      
+      <div class="header-controls">
+        <div class="lang-selector-group">
+          <button class="lang-btn active" id="btn-lang-en" data-lang="en">
+            <span class="flag">🇺🇸</span> English
+          </button>
+          <button class="lang-btn" id="btn-lang-ja" data-lang="ja">
+            <span class="flag">🇯🇵</span> 日本語 (Japanese)
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT GRID -->
+    <main class="main-grid">
+      
+      <!-- LEFT COLUMN: Practice Studio -->
+      <section class="card studio-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-microphone-lines"></i> Practice Studio</h2>
+          <span class="badge badge-accent" id="active-lang-badge">English Mode</span>
+        </div>
+
+        <!-- Target Word Selection -->
+        <div class="form-group">
+          <label for="word-select">Select Practice Word or Type Custom:</label>
+          <div class="select-input-group">
+            <select id="word-select" class="custom-select">
+              <!-- Options populated dynamically -->
+            </select>
+            <button id="btn-listen-native" class="btn btn-secondary" title="Listen to Native Pronunciation">
+              <i class="fa-solid fa-volume-high"></i> Listen Native
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Word Input Option -->
+        <div class="form-group" id="custom-word-wrapper">
+          <label for="custom-word-input">Custom Word / Phrase:</label>
+          <input type="text" id="custom-word-input" class="custom-input" placeholder="Type any word or phrase..." />
+        </div>
+
+        <!-- Target Word Display Card -->
+        <div class="target-word-card" id="target-word-card">
+          <div class="target-word-main">
+            <h3 id="display-target-word">Pronunciation</h3>
+            <span class="phonetic-ipa" id="display-ipa">prəˌnʌn.siˈeɪ.ʃən</span>
+          </div>
+          <div class="target-word-meta">
+            <span class="meta-tag" id="display-category">Polysyllabic & Stress</span>
+            <span class="meta-tag meta-diff" id="display-difficulty">Intermediate</span>
+            <span class="meta-tag meta-pitch" id="display-pitch-profile">Pitch: L-L-H-L</span>
+          </div>
+          <p class="target-tip" id="display-tip">
+            <i class="fa-solid fa-lightbulb"></i> Primary stress is on 'eɪ' (pro-NUN-ci-A-tion).
+          </p>
+        </div>
+
+        <!-- Live Audio Recorder Studio -->
+        <div class="recorder-container">
+          <div class="visualizer-wrapper">
+            <canvas id="live-audio-canvas" width="600" height="120"></canvas>
+            <div class="timer-display" id="record-timer">00:00</div>
+            <div class="status-overlay" id="record-status">Click Microphone to Start Recording</div>
+          </div>
+
+          <div class="recorder-actions">
+            <button id="btn-record" class="btn btn-record-main">
+              <i class="fa-solid fa-microphone"></i>
+              <span id="record-btn-text">Start Recording</span>
+            </button>
+            <button id="btn-play-spoken" class="btn btn-secondary" disabled>
+              <i class="fa-solid fa-play"></i> Play Spoken
+            </button>
+            <button id="btn-analyze" class="btn btn-primary" disabled>
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Pronunciation
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: Analysis & Diagnostics -->
+      <section class="card results-card" id="results-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-chart-line"></i> Score & Feedback</h2>
+          <span class="badge" id="grade-badge">A Grade</span>
+        </div>
+
+        <!-- Idle placeholder when no analysis yet -->
+        <div class="idle-results" id="idle-results-state">
+          <div class="idle-icon"><i class="fa-solid fa-headphones-simple"></i></div>
+          <h3>Ready for Analysis</h3>
+          <p>Record your voice speaking the target word and click <strong>"Analyze Pronunciation"</strong> to get instant AI scoring, pitch curves, and feedback.</p>
+        </div>
+
+        <!-- Analysis Dashboard Output -->
+        <div class="analysis-output hidden" id="analysis-output-state">
+          
+          <!-- Overall Gauge & Summary -->
+          <div class="score-hero">
+            <div class="gauge-wrapper">
+              <svg class="score-gauge" viewBox="0 0 120 120">
+                <circle class="gauge-bg" cx="60" cy="60" r="52"></circle>
+                <circle class="gauge-fill" id="gauge-fill-circle" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+              </svg>
+              <div class="gauge-text">
+                <span class="gauge-value" id="overall-score-val">0</span>
+                <span class="gauge-max">%</span>
+              </div>
+            </div>
+
+            <div class="score-summary">
+              <h3 id="grade-title">Mastery</h3>
+              <p id="grade-description">Excellent native-like pronunciation accuracy!</p>
+              <div class="spoken-comparison">
+                <span class="label">Recognized Speech:</span>
+                <span class="transcript-text" id="spoken-transcript">"pronunciation"</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Score Breakdown Metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon metric-icon-green"><i class="fa-solid fa-bullseye"></i></div>
+              <div class="metric-info">
+                <span class="metric-name">Phonetic Accuracy</span>
+                <span class="metric-val" id="score-phonetic">0%</span>
+              </div>
+              <div class="metric-bar"><div class="bar-fill fill-green" id="bar-phonetic"></div></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon metric-icon-purple"><i class="fa-solid fa-wave-square"></i></div>
+              <div class="metric-info">
+                <span class="metric-name">Pitch & Intonation</span>
+                <span class="metric-val" id="score-pitch">0%</span>
+              </div>
+              <div class="metric-bar"><div class="bar-fill fill-purple" id="bar-pitch"></div></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon metric-icon-blue"><i class="fa-solid fa-gauge-high"></i></div>
+              <div class="metric-info">
+                <span class="metric-name">Fluency & Pacing</span>
+                <span class="metric-val" id="score-fluency">0%</span>
+              </div>
+              <div class="metric-bar"><div class="bar-fill fill-blue" id="bar-fluency"></div></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon metric-icon-amber"><i class="fa-solid fa-sliders"></i></div>
+              <div class="metric-info">
+                <span class="metric-name">Signal Clarity</span>
+                <span class="metric-val" id="score-clarity">0%</span>
+              </div>
+              <div class="metric-bar"><div class="bar-fill fill-amber" id="bar-clarity"></div></div>
+            </div>
+          </div>
+
+          <!-- Phoneme-by-Phoneme Alignment Breakdown -->
+          <div class="phoneme-section">
+            <h4><i class="fa-solid fa-spell-check"></i> Phoneme Diagnostic Breakdown</h4>
+            <div class="phoneme-cards-container" id="phoneme-cards-list">
+              <!-- Dynamically populated phoneme cards -->
+            </div>
+          </div>
+
+          <!-- Pitch Contour & Waveform Canvas Comparison -->
+          <div class="pitch-chart-section">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-chart-area"></i> Pitch Contour Overlay (Target vs. Spoken)</h4>
+              <div class="chart-legend">
+                <span class="legend-item legend-ref"><span class="dot"></span> Target Pitch</span>
+                <span class="legend-item legend-user"><span class="dot"></span> Your Pitch</span>
+              </div>
+            </div>
+            <canvas id="pitch-contour-canvas" width="600" height="150"></canvas>
+          </div>
+
+          <!-- Actionable AI Feedback Tips -->
+          <div class="feedback-section">
+            <h4><i class="fa-solid fa-comments"></i> Coaching & Improvement Tips</h4>
+            <ul class="feedback-list" id="feedback-tips-list">
+              <!-- Dynamically populated feedback items -->
+            </ul>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER / HISTORY BAR -->
+    <footer class="footer-bar">
+      <div class="history-summary">
+        <i class="fa-solid fa-history"></i> Practice Session Attempts: <strong id="attempt-count">0</strong>
+      </div>
+      <div class="footer-note">
+        Powered by Python, Librosa Acoustic Analysis & Speech Recognition
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="/static/js/audio_recorder.js"></script>
+  <script src="/static/js/visualizer.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
