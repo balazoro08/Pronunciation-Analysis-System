@@ -60,35 +60,7 @@ An interactive, full-stack AI speech recognition, acoustic prosody analysis, and
 
 ---
 
-## 🚀 Quick Start
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/balazoro08/Pronunciation-Analysis-System.git
-   cd Pronunciation-Analysis-System
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run the Application**:
-   ```bash
-   python run.py
-   ```
-
-4. Open your browser and navigate to `http://127.0.0.1:8000`.
-
----
-
-## 🧪 Running Tests
-
-```bash
-python -m pytest tests/test_analyzer.py -v
-```
-
----
 
 ## 📜 License
 
